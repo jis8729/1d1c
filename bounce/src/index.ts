@@ -1,5 +1,4 @@
-import { copyFileSync } from "fs";
-import { Ball, boxBoundary, vector2D } from "./ball.js";
+import { Ball, vector2D } from "./ball.js";
 
 const canvas = document.getElementById(
     "canvas"
