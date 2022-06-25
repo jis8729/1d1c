@@ -1,11 +1,11 @@
 {
-  "name": "ode_simulation",
-  "version": "1.0.0",
-  "description": "",
-  "scripts": {
-    "dev" : "open -a \"Google Chrome\" ./index.html"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "name": "ode_simulation",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "start": "http-server -c-1 -p 8081 -o"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
 }
