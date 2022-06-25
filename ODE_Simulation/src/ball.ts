@@ -15,20 +15,15 @@ export class Ball {
     radius: number;
     selected: boolean;
     wallCollide: boolean;
-    gravityConstant: number;
+    g: number;
 
-    constructor(
-        pos: vector2D,
-        vel: vector2D,
-        radius: number,
-        gravityConstant: number
-    ) {
+    constructor(pos: vector2D, vel: vector2D, radius: number, g: number) {
         this.pos = pos;
         this.radius = radius;
         this.vel = vel;
         this.selected = false;
         this.wallCollide = false;
-        this.gravityConstant = gravityConstant;
+        this.g = g;
     }
 
     update(
@@ -134,12 +129,12 @@ export class Ball {
             ball.pos.y += 0.5 * minimumDist * vector.y;
 
             if (this.wallCollide) {
-                if (Math.abs(this.vel.x) <= 9.8) this.vel.x = 0;
-                if (Math.abs(this.vel.y) <= 9.8) this.vel.y = 0;
+                if (Math.abs(this.vel.x) <= this.g) this.vel.x = 0;
+                if (Math.abs(this.vel.y) <= this.g) this.vel.y = 0;
             }
             if (ball.wallCollide) {
-                if (Math.abs(ball.vel.x) <= 9.8) ball.vel.x = 0;
-                if (Math.abs(ball.vel.y) <= 9.8) ball.vel.y = 0;
+                if (Math.abs(ball.vel.x) <= this.g) ball.vel.x = 0;
+                if (Math.abs(ball.vel.y) <= this.g) ball.vel.y = 0;
             }
         }
     }
@@ -148,7 +143,7 @@ export class Ball {
         this.wallCollide = false;
 
         if (this.pos.x - this.radius < box.left.x) {
-            if (Math.abs(this.vel.x) > 9.8) {
+            if (Math.abs(this.vel.x) > this.g) {
                 this.vel.x = Math.abs(this.vel.x);
             } else this.vel.x = 0;
 
@@ -156,20 +151,21 @@ export class Ball {
             this.wallCollide = true;
         }
         if (this.pos.x + this.radius > box.right.x) {
-            if (Math.abs(this.vel.x) > 9.8)
+            if (Math.abs(this.vel.x) > this.g)
                 this.vel.x = -1 * Math.abs(this.vel.x);
             else this.vel.x = 0;
             this.pos.x = box.right.x - this.radius;
             this.wallCollide = true;
         }
         if (this.pos.y - this.radius < box.bottom.y) {
-            if (Math.abs(this.vel.y) > 9.8) this.vel.y = Math.abs(this.vel.y);
+            if (Math.abs(this.vel.y) > this.g)
+                this.vel.y = Math.abs(this.vel.y);
             else this.vel.y = 0;
             this.pos.y = box.bottom.y + this.radius;
             this.wallCollide = true;
         }
         if (this.pos.y + this.radius > box.top.y) {
-            if (Math.abs(this.vel.y) > 9.8)
+            if (Math.abs(this.vel.y) > this.g)
                 this.vel.y = -1 * Math.abs(this.vel.y);
             else this.vel.y = 0;
             this.pos.y = box.top.y - this.radius;
