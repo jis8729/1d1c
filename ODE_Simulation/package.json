@@ -1,0 +1,11 @@
+{
+  "name": "ode_simulation",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev" : "open -a \"Google Chrome\" ./index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

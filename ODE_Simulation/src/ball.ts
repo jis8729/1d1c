@@ -1,12 +1,7 @@
-const canvas: HTMLCanvasElement = document.getElementById(
-    "canvas"
-) as HTMLCanvasElement;
-
 export interface vector2D {
     x: number;
     y: number;
 }
-
 export interface boxBoundary {
     left: vector2D;
     right: vector2D;
@@ -15,35 +10,62 @@ export interface boxBoundary {
 }
 
 export class Ball {
-    private accel: vector2D;
-    private radius: number;
-    private vel: vector2D;
-    private pos: vector2D;
-    private friction: number;
+    vel: vector2D;
+    pos: vector2D;
+    radius: number;
+    selected: boolean;
+    wallCollide: boolean;
+    gravityConstant: number;
 
-    constructor(vel: vector2D, pos: vector2D) {
-        this.accel = { x: 0, y: 0 };
-        this.radius = 20;
-        this.accel.y = 10 * 100;
-        this.vel = vel;
+    constructor(
+        pos: vector2D,
+        vel: vector2D,
+        radius: number,
+        gravityConstant: number
+    ) {
         this.pos = pos;
-        this.friction = 2.5;
-    }
-
-    getAccel(): vector2D {
-        return this.accel;
-    }
-
-    setAccel(accel: vector2D) {
-        this.accel = accel;
-    }
-
-    getVel(): vector2D {
-        return this.vel;
-    }
-
-    setVel(vel: vector2D) {
+        this.radius = radius;
         this.vel = vel;
+        this.selected = false;
+        this.wallCollide = false;
+        this.gravityConstant = gravityConstant;
+    }
+
+    update(
+        box: boxBoundary,
+        balls: Ball[],
+        x: number,
+        y: number,
+        vx: number,
+        vy: number
+    ) {
+        this.pos.x = x;
+        this.pos.y = y;
+        this.vel.x = vx;
+        this.vel.y = vy;
+        this.handleBoxCollision(box);
+        this.handleBallCollision(balls);
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.strokeStyle = "black";
+
+        ctx.beginPath();
+        ctx.arc(this.pos.x, this.pos.y, this.radius, 0, 2 * Math.PI, false);
+        ctx.strokeStyle = "FF0000";
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    clicked(ptX: number, ptY: number): boolean {
+        if (
+            (this.pos.x - ptX) * (this.pos.x - ptX) +
+                (this.pos.y - ptY) * (this.pos.y - ptY) <=
+            this.radius * this.radius
+        ) {
+            return true;
+        }
+        return false;
     }
 
     getPos(): vector2D {
@@ -60,51 +82,7 @@ export class Ball {
         this.pos.y = this.pos.y + delta.y;
     }
 
-    clicked(ptX: number, ptY: number): boolean {
-        if (
-            (this.pos.x - ptX) * (this.pos.x - ptX) +
-                (this.pos.y - ptY) * (this.pos.y - ptY) <=
-            this.radius * this.radius
-        ) {
-            return true;
-        }
-        return false;
-    }
-
-    update(box: boxBoundary, balls: Ball[], dt: number) {
-        this.vel = {
-            x: this.vel.x + this.accel.x * dt,
-            y: this.vel.y + this.accel.y * dt,
-        };
-
-        if (this.vel.x > 0) this.vel.x -= this.friction;
-        if (this.vel.x < 0) this.vel.x += this.friction;
-        if (this.vel.y > 0) this.vel.y -= this.friction;
-        if (this.vel.y < 0) this.vel.y += this.friction;
-
-        if (Math.abs(this.vel.x) < this.friction) this.vel.x = 0;
-        if (Math.abs(this.vel.y) < this.friction) this.vel.y = 0;
-
-        this.pos = {
-            x: this.pos.x + this.vel.x * dt,
-            y: this.pos.y + this.vel.y * dt,
-        };
-
-        this.handleBoxCollision(box);
-        this.handleBallCollision(balls);
-    }
-
-    draw(ctx: CanvasRenderingContext2D) {
-        ctx.strokeStyle = "black";
-
-        ctx.beginPath();
-        ctx.arc(this.pos.x, this.pos.y, this.radius, 0, 2 * Math.PI, false);
-        ctx.strokeStyle = "FF0000";
-        ctx.fill();
-        ctx.stroke();
-    }
-
-    private handleBallCollision(balls: Ball[]) {
+    handleBallCollision(balls: Ball[]) {
         const self = this;
 
         for (let ball of balls) {
@@ -117,7 +95,7 @@ export class Ball {
 
             const norm = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
 
-            if (norm > this.radius + ball.radius) continue;
+            if (norm >= this.radius + ball.radius) continue;
 
             const unitVector = { x: vector.x / norm, y: vector.y / norm };
             const unitTangentVector = { x: -unitVector.y, y: unitVector.x };
@@ -154,29 +132,48 @@ export class Ball {
             this.pos.y -= 0.5 * minimumDist * vector.y;
             ball.pos.x += 0.5 * minimumDist * vector.x;
             ball.pos.y += 0.5 * minimumDist * vector.y;
+
+            if (this.wallCollide) {
+                if (Math.abs(this.vel.x) <= 9.8) this.vel.x = 0;
+                if (Math.abs(this.vel.y) <= 9.8) this.vel.y = 0;
+            }
+            if (ball.wallCollide) {
+                if (Math.abs(ball.vel.x) <= 9.8) ball.vel.x = 0;
+                if (Math.abs(ball.vel.y) <= 9.8) ball.vel.y = 0;
+            }
         }
     }
 
-    private handleBoxCollision(box: boxBoundary) {
+    handleBoxCollision(box: boxBoundary) {
+        this.wallCollide = false;
+
         if (this.pos.x - this.radius < box.left.x) {
-            this.vel.x = Math.abs(this.vel.x);
-            this.pos.x = this.radius;
+            if (Math.abs(this.vel.x) > 9.8) {
+                this.vel.x = Math.abs(this.vel.x);
+            } else this.vel.x = 0;
+
+            this.pos.x = box.left.x + this.radius;
+            this.wallCollide = true;
         }
         if (this.pos.x + this.radius > box.right.x) {
-            this.vel.x = -1 * Math.abs(this.vel.x);
+            if (Math.abs(this.vel.x) > 9.8)
+                this.vel.x = -1 * Math.abs(this.vel.x);
+            else this.vel.x = 0;
             this.pos.x = box.right.x - this.radius;
+            this.wallCollide = true;
         }
         if (this.pos.y - this.radius < box.bottom.y) {
-            this.vel.y = Math.abs(this.vel.y);
-            this.pos.y = this.radius;
+            if (Math.abs(this.vel.y) > 9.8) this.vel.y = Math.abs(this.vel.y);
+            else this.vel.y = 0;
+            this.pos.y = box.bottom.y + this.radius;
+            this.wallCollide = true;
         }
         if (this.pos.y + this.radius > box.top.y) {
-            this.vel.y = -1 * Math.abs(this.vel.y);
+            if (Math.abs(this.vel.y) > 9.8)
+                this.vel.y = -1 * Math.abs(this.vel.y);
+            else this.vel.y = 0;
             this.pos.y = box.top.y - this.radius;
+            this.wallCollide = true;
         }
-    }
-
-    private handleCarCollision(car: Ball[]) {
-        car.forEach((element) => {});
     }
 }
