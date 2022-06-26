@@ -27,7 +27,7 @@ const box = {
 let solver = new ODESolver(mass, gravity, drag, h, box);
 // create balls
 let balls = new Array;
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
     balls.push(new Ball({ x: Math.random() * canvas.width, y: Math.random() * canvas.height / 2 }, { x: Math.random() * 500, y: 0 }, box.radius, gravity));
     //balls.push(new Ball({x: 200, y: 200},{x: 0, y: 0}, box.radius));
 }
