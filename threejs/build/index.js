@@ -1,4 +1,5 @@
 "use strict";
+WebGL.isWebGL2Available();
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 // setsize 3번째 false면 사이즈는 그대로, 해상도 변경됨, 레티나 디스플레이 위한 해상도 두배 설정

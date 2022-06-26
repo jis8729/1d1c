@@ -1,3 +1,5 @@
+WebGL.isWebGL2Available();
+
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
