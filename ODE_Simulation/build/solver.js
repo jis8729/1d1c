@@ -24,4 +24,22 @@ export class ODESolver {
         // x'' = g - b/m * x' = F/m = a
         return -(param.b / param.m) * vVal;
     }
+    collideFy(tVal, xVal, vVal, param) {
+        if (xVal - param.c.radius < param.c.bottom.y) {
+            return (-(param.b / param.m) * vVal -
+                1 * (-param.c.bottom.y + xVal - param.c.radius));
+        }
+        else if (xVal + param.c.radius > param.c.top.y) {
+            return (-(param.b / param.m) * vVal -
+                1 * (-param.c.top.y + xVal - param.c.radius));
+        }
+        return -(param.b / param.m) * vVal;
+    }
+    collideFx(tVal, xVal, vVal, param) {
+        if (xVal - param.c.radius < param.c.left.x)
+            return -(param.b / param.m) * vVal - 1 * (param.c.left.x - xVal);
+        else if (xVal + param.c.radius > param.c.right.x)
+            return -(param.b / param.m) * vVal - 1 * (param.c.right.x - xVal);
+        return -(param.b / param.m) * vVal;
+    }
 }

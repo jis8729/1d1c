@@ -15,7 +15,10 @@ export class Ball {
     radius: number;
     selected: boolean;
     wallCollide: boolean;
+    xCollide: boolean;
+    yCollide: boolean;
     g: number;
+    coulombFriction: number;
 
     constructor(pos: vector2D, vel: vector2D, radius: number, g: number) {
         this.pos = pos;
@@ -23,7 +26,10 @@ export class Ball {
         this.vel = vel;
         this.selected = false;
         this.wallCollide = false;
+        this.xCollide = false;
+        this.yCollide = false;
         this.g = g;
+        this.coulombFriction = 1;
     }
 
     update(
@@ -90,9 +96,19 @@ export class Ball {
 
             const norm = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
 
+            if (this.xCollide) {
+                vector.x = 0;
+                vector.y = norm;
+            }
+            if (this.yCollide) {
+                vector.x = norm;
+                vector.y = 0;
+            }
+
             if (norm >= this.radius + ball.radius) continue;
 
             const unitVector = { x: vector.x / norm, y: vector.y / norm };
+
             const unitTangentVector = { x: -unitVector.y, y: unitVector.x };
 
             const v1n = unitVector.x * this.vel.x + unitVector.y * this.vel.y;
@@ -123,27 +139,34 @@ export class Ball {
 
             const minimumDist = (this.radius + ball.radius - norm) / norm;
 
-            if (this.wallCollide) {
-                if (Math.abs(this.vel.x) <= this.g) this.vel.x = 0;
-                if (Math.abs(this.vel.y) <= this.g) this.vel.y = 0;
-            } else {
-                this.pos.x -= 0.5 * minimumDist * vector.x;
-                this.pos.y -= 0.5 * minimumDist * vector.y;
-            }
-            if (ball.wallCollide) {
-                if (Math.abs(ball.vel.x) <= this.g) ball.vel.x = 0;
-                if (Math.abs(ball.vel.y) <= this.g) ball.vel.y = 0;
-            } else {
-                ball.pos.x += 0.5 * minimumDist * vector.x;
-                ball.pos.y += 0.5 * minimumDist * vector.y;
-            }
+            this.pos.x -= 0.5 * minimumDist * vector.x;
+            ball.pos.x += 0.5 * minimumDist * vector.x;
+            this.pos.y -= 0.5 * minimumDist * vector.y;
+            ball.pos.y += 0.5 * minimumDist * vector.y;
+
+            // // if (this.wallCollide)
+            // {
+            //     if (Math.abs(this.vel.x) <= this.g) this.vel.x = 0;
+            //     if (Math.abs(this.vel.y) <= this.g) this.vel.y = 0;
+            // }
+            // //if (ball.wallCollide)
+            // {
+            //     if (Math.abs(ball.vel.x) <= this.g) ball.vel.x = 0;
+            //     if (Math.abs(ball.vel.y) <= this.g) ball.vel.y = 0;
+            // }
         }
     }
 
     handleBoxCollision(box: boxBoundary) {
         this.wallCollide = false;
+        this.xCollide = false;
+        this.yCollide = false;
 
         if (this.pos.x - this.radius < box.left.x) {
+            this.vel.x = Math.abs(this.vel.x);
+            this.pos.x = box.left.x + this.radius;
+            this.wallCollide = true;
+            this.xCollide = true;
             if (Math.abs(this.vel.x) > this.g) {
                 this.vel.x = Math.abs(this.vel.x);
             } else {
@@ -151,34 +174,50 @@ export class Ball {
                 this.pos.x = box.left.x + this.radius;
             }
 
-            this.wallCollide = true;
+            // this.wallCollide = true;
+            // this.xCollide = true;
         }
         if (this.pos.x + this.radius > box.right.x) {
-            if (Math.abs(this.vel.x) > this.g)
-                this.vel.x = -1 * Math.abs(this.vel.x);
-            else {
-                this.vel.x = 0;
-                this.pos.x = box.right.x - this.radius;
-            }
+            this.vel.x = -1 * Math.abs(this.vel.x);
+            this.pos.x = box.right.x - this.radius;
             this.wallCollide = true;
+            this.xCollide = true;
+            // if (Math.abs(this.vel.x) > this.g)
+            //     this.vel.x = -1 * Math.abs(this.vel.x);
+            // else {
+            //     this.vel.x = 0;
+            //     this.pos.x = box.right.x - this.radius;
+            // }
+            // this.wallCollide = true;
+            // this.xCollide = true;
         }
         if (this.pos.y - this.radius < box.bottom.y) {
-            if (Math.abs(this.vel.y) > this.g)
-                this.vel.y = Math.abs(this.vel.y);
-            else {
-                this.vel.y = 0;
-                this.pos.y = box.bottom.y + this.radius;
-            }
+            this.vel.y = Math.abs(this.vel.y);
+            this.pos.y = box.bottom.y + this.radius;
             this.wallCollide = true;
+            this.yCollide = true;
+            // if (Math.abs(this.vel.y) > this.g)
+            //     this.vel.y = Math.abs(this.vel.y);
+            // else {
+            //     this.vel.y = 0;
+            //     this.pos.y = box.bottom.y + this.radius;
+            // }
+            // this.wallCollide = true;
+            // this.yCollide = true;
         }
         if (this.pos.y + this.radius > box.top.y) {
+            //this.vel.y = -1 * Math.abs(this.vel.y);
+            //this.pos.y = box.top.y - this.radius;
+            this.wallCollide = true;
+            this.yCollide = true;
             if (Math.abs(this.vel.y) > this.g)
                 this.vel.y = -1 * Math.abs(this.vel.y);
             else {
                 this.vel.y = 0;
                 this.pos.y = box.top.y - this.radius;
             }
-            this.wallCollide = true;
+            // this.wallCollide = true;
+            // this.yCollide = true;
         }
     }
 }

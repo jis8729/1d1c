@@ -38,8 +38,8 @@ let solver = new ODESolver(mass, gravity, drag, h, box);
 
 // create balls
 let balls = new Array<Ball>;
-for (let i = 0; i < 50; i++) {
-    balls.push(new Ball({x: Math.random()*canvas.width, y: Math.random()*canvas.height/2},{x: Math.random()*500, y: 0}, box.radius, gravity));
+for (let i = 0; i < 1; i++) {
+    balls.push(new Ball({x: Math.random()*canvas.width, y: Math.random()*canvas.height/2},{x: Math.random()*100, y: 0}, box.radius, gravity));
     //balls.push(new Ball({x: 200, y: 200},{x: 0, y: 0}, box.radius));
 }
 
@@ -60,13 +60,15 @@ function animate() {
         ctx?.clearRect(0, 0, canvas.width, canvas.height);
         for (ball of balls) {
             if (!ball.selected) {
-                if ((canvas.height - ball.pos.y) + Math.sqrt(ball.vel.x*ball.vel.x + ball.vel.y*ball.vel.y) < 10) {
-                    
-                }
-                result = solver.rk4(Ts, ball.pos.y, ball.vel.y, solver.Fy);
+                //ball.handleBoxCollision(box);
+                if (ball.yCollide) {result = {x: ball.pos.y, v: ball.vel.y};
+                
+                }//result = solver.rk4(Ts, ball.pos.y, ball.vel.y, solver.collideFy)
+                else               result = solver.rk4(Ts, ball.pos.y, ball.vel.y, solver.Fy);
                 y = result.x;
                 vy = result.v;
-                result = solver.rk4(Ts, ball.pos.x, ball.vel.x, solver.Fx);
+                if (ball.xCollide) {result = {x: ball.pos.x, v: ball.vel.x}}//result = solver.rk4(Ts, ball.pos.x, ball.vel.x, solver.collideFx);
+                else               result = solver.rk4(Ts, ball.pos.x, ball.vel.x, solver.Fx);
                 x = result.x;
                 vx = result.v;
                 ball.update(box, balls, x, y, vx, vy);

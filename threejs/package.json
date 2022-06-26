@@ -1,0 +1,16 @@
+{
+    "name": "threejs",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "setup": "npm install --save @types/three",
+        "start": "http-server -c-1 -p 8081 -o"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@types/three": "^0.141.0",
+        "three": "^0.141.0"
+    }
+}
