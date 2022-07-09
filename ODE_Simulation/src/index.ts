@@ -12,7 +12,6 @@ canvas.height = 500;
 const ctx = canvas.getContext("2d");
 const clientRect = canvas.getBoundingClientRect();
 
-
 // simulation environment
 const fps = 60;
 let delta;

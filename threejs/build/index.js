@@ -1,22 +1,26 @@
 "use strict";
 WebGL.isWebGL2Available();
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-// setsize 3번째 false면 사이즈는 그대로, 해상도 변경됨, 레티나 디스플레이 위한 해상도 두배 설정
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth * 2, window.innerHeight * 2, false);
 document.body.appendChild(renderer.domElement);
-//
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-camera.position.z = 5;
-// requestanimationframe 은 유저가 브라우저 윈도우에서 벗어나면 멈춤. 전력 아낄 수 있음.
-function animate() {
-    requestAnimationFrame(animate);
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-    renderer.render(scene, camera);
-}
-animate();
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+camera.position.set(0, 0, 5);
+camera.lookAt(0, 0, 0);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+const size = 10;
+const divisions = 10;
+const gridHelper = new THREE.GridHelper(size, divisions);
+gridHelper.position.set(0, 0, 0);
+gridHelper.rotation.set(Math.PI / 2, 0, 0);
+const curve = new THREE.QuadraticBezierCurve(new THREE.Vector2(-10, 0), new THREE.Vector2(0, 20), new THREE.Vector2(10, 0));
+const path = new THREE.Path();
+path.lineTo(0, 0.8);
+path.quadraticCurveTo(0, 1, 0.2, 1);
+path.lineTo(1, 1);
+const points = path.getPoints();
+const geometry = new THREE.BufferGeometry().setFromPoints(points);
+const material = new THREE.LineBasicMaterial({ color: 0x000000 });
+const line = new THREE.Line(geometry, material);
+scene.add(line);
+renderer.render(scene, camera);
