@@ -1,10 +1,12 @@
 export class Vector2D {
     x: number;
     y: number;
+    theta: number;
 
     constructor(x: number, y: number) {
         this["x"] = x;
         this["y"] = y;
+        this.theta = Math.atan2(this.y, this.x);
     }
 
     roatate(theta: number) {
@@ -21,11 +23,4 @@ export class Vector2D {
     }
 
     getDivergence() {}
-}
-
-export function vectorRotation(x_0: number, y_0: number, theta: number) {
-    let x_1 = Math.cos(theta) * x_0 - Math.sin(theta) * y_0;
-    let y_1 = Math.sin(theta) * x_0 + Math.cos(theta) * y_0;
-
-    return { x: x_1, y: y_1 };
 }
